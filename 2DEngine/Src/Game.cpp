@@ -9,7 +9,10 @@ SDL_Renderer* Game::renderer = nullptr;
 TileMap* map = nullptr;
 
 Manager manager;
-auto& newPlayer(manager.AddEntity());
+SDL_Event Game::event;
+
+
+auto& player(manager.AddEntity());
 
 Game::Game()
 {
@@ -46,18 +49,17 @@ void Game::Init(const char* title, int xpos, int ypos, int width, int height, bo
 		}
 	}
 
-//	player = new GameObject("Assets/Sprites/player.png", 0, 0);
-//	enemy = new GameObject("Assets/Sprites/enemy.png", 64,64);
+	// ECS Implementation
 
-	newPlayer.AddComponent<PositionComponent>();
-	newPlayer.GetComponent<PositionComponent>().SetPosition(500, 500);
+	player.AddComponent<TransformComponent>();
+	player.AddComponent<SpriteComponent>("Assets/Sprites/player.png");
+	player.AddComponent<KeyboardController>();
 
 	map = new TileMap();
 }
 
 void Game::HandleEvents()
 {
-	SDL_Event event;
 	SDL_PollEvent(&event);
 	switch (event.type)
 	{
@@ -71,16 +73,17 @@ void Game::HandleEvents()
 
 void Game::Update()
 {
+	manager.Refresh();
 	manager.Update();
-	std::cout << newPlayer.GetComponent<PositionComponent>().X() << "," << newPlayer.GetComponent<PositionComponent>().Y() << std::endl;
 }
 
 void Game::Render()
 {
 	SDL_RenderClear(renderer);
 	
-	map->DrawMap();
 	// add stuff to render here
+	map->DrawMap();
+	manager.Draw();
 
 	SDL_RenderPresent(renderer);
 }

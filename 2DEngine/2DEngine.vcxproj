@@ -154,17 +154,20 @@
     <ClCompile Include="Src\main.cpp" />
     <ClCompile Include="Src\TextureManager.cpp" />
     <ClCompile Include="Src\TileMap.cpp" />
+    <ClCompile Include="Src\Vector2D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\ECS\Components.h" />
     <ClInclude Include="Src\ECS\ECS.h" />
+    <ClInclude Include="Src\ECS\KeyboardController.h" />
     <ClInclude Include="Src\Game.h" />
     <ClInclude Include="Src\GameObject.h" />
     <ClInclude Include="Src\GameObjectd.h" />
     <ClInclude Include="Src\ECS\SpriteComponent.h" />
-    <ClInclude Include="Src\ECS\PositionComponent.h" />
+    <ClInclude Include="Src\ECS\TransformComponent.h" />
     <ClInclude Include="Src\TextureManager.h" />
     <ClInclude Include="Src\TileMap.h" />
+    <ClInclude Include="Src\Vector2D.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Sprites\player.png" />
