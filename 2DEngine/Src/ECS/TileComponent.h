@@ -8,49 +8,46 @@
 class TileComponent : public Component
 {
 public:
-	TransformComponent* transform;
-	SpriteComponent* sprite;
-
-	SDL_Rect tileRect;
-	int tileID;
-	const char* filePath;
+	SDL_Texture* texture;
+	SDL_Rect srcRect;
+	SDL_Rect destRect;
+	Vector2D position;
 
 	TileComponent() = default;
-
-	TileComponent(int x, int y, int w, int h, int id)
+	
+	~TileComponent()
 	{
-		tileRect.x = x;
-		tileRect.y = y;
-		tileRect.w = w;
-		tileRect.h = h;
-		tileID = id;
-
-		switch (tileID)
-		{
-		case 0:
-			filePath = "Assets/Sprites/water.png";
-			break;
-		case 1:
-			filePath = "Assets/Sprites/dirt.png";
-			break;
-		case 2:
-			filePath = "Assets/Sprites/grass.png";
-			break;
-
-		default:
-			std::cout << "Invalid sprite ID passed to the TileComponent" << std::endl;
-			break;
-		}
-
+		SDL_DestroyTexture(texture);
 	}
 
-	void Init() override
-	{
-		entity->AddComponent<TransformComponent>(static_cast<float>(tileRect.x), static_cast<float>(tileRect.y), tileRect.w, tileRect.h, 1);
-		transform = &entity->GetComponent<TransformComponent>();
 
-		entity->AddComponent<SpriteComponent>(filePath);
-		sprite = &entity->GetComponent<SpriteComponent>();
+	TileComponent(int srcX, int srcY, int xPos, int yPos, const char *filePath)
+	{
+		texture = TextureManager::LoadTexture(filePath);
+
+		position.x = xPos;
+		position.y = yPos;
+
+		srcRect.x = srcX;
+		srcRect.y = srcY;
+		srcRect.w = 32;
+		srcRect.h = 32;
+
+		destRect.x = xPos;
+		destRect.y = yPos;
+		destRect.w = 64;
+		destRect.h = 64;
 	}
 
+	void Update() override
+	{
+		destRect.x = position.x - Game::camera.x;
+		destRect.y = position.y - Game::camera.y;
+	}
+
+
+	void Draw() override
+	{
+		TextureManager::Draw(texture, srcRect, destRect, SDL_FLIP_NONE);
+	}
 };

@@ -11,10 +11,13 @@ TileMap* map = nullptr;
 Manager manager;
 SDL_Event Game::event;
 
+SDL_Rect Game::camera = { 0, 0, 800, 640};
+
 std::vector<ColliderComponent*> Game::colliders;
 
+bool Game::isRunning = false;
 auto& player(manager.AddEntity());
-auto& wall(manager.AddEntity());
+const char* mapFile = "Assets/Sprites/terrain_ss.png";
 
 enum groupLabels : std::size_t
 {
@@ -23,6 +26,11 @@ enum groupLabels : std::size_t
 	groupEnemies,
 	groupColliders
 };
+
+
+auto& tiles(manager.GetGroup(groupMap));
+auto& players(manager.GetGroup(groupPlayers));
+auto& enemies(manager.GetGroup(groupEnemies));
 
 
 Game::Game()
@@ -61,20 +69,14 @@ void Game::Init(const char* title, int xpos, int ypos, int width, int height, bo
 	}
 
 	// ECS Implementation
-	TileMap::LoadTileMap("assets/levels/sample_16x16.map", 16, 16);
+	TileMap::LoadTileMap("assets/levels/map.map", 25, 20);
 
 
-	player.AddComponent<TransformComponent>(2);
+	player.AddComponent<TransformComponent>(4);
 	player.AddComponent<SpriteComponent>("Assets/Sprites/player_anims.png", true);
 	player.AddComponent<KeyboardController>();
 	player.AddComponent<ColliderComponent>("player");
 	player.AddGroup(groupPlayers);
-
-
-	wall.AddComponent<TransformComponent>(300.0f, 300.0f, 300, 20, 1);
-	wall.AddComponent<SpriteComponent>("Assets/Sprites/dirt.png");
-	wall.AddComponent<ColliderComponent>("wall");
-	wall.AddGroup(groupMap);
 
 	map = new TileMap();
 }
@@ -97,15 +99,24 @@ void Game::Update()
 	manager.Refresh();
 	manager.Update();
 
-	for (auto cc : colliders)
-	{
-		Collision::AABB(player.GetComponent<ColliderComponent>(), *cc);
-	}
-}
+	camera.x = static_cast<int>(player.GetComponent<TransformComponent>().position.x) - 400;
+	camera.y = static_cast<int>(player.GetComponent<TransformComponent>().position.y) - 320;
 
-auto& tiles(manager.GetGroup(groupMap));
-auto& players(manager.GetGroup(groupPlayers));
-auto& enemies(manager.GetGroup(groupEnemies));
+	if (camera.x < 0)
+		camera.x = 0;
+	if (camera.y < 0)
+		camera.y = 0;
+	if (camera.x > camera.w)
+		camera.x = camera.w;
+	if (camera.y > camera.h)
+		camera.y = camera.h;
+
+
+	//for (auto cc : colliders)
+	//{
+	//	Collision::AABB(player.GetComponent<ColliderComponent>(), *cc);
+	//}
+}
 
 
 void Game::Render()
@@ -146,9 +157,9 @@ bool Game::IsRunning()
 	return isRunning;
 }
 
-void Game::AddTile(int tileID, int x, int y)
+void Game::AddTile(int srcX, int srcY, int xPos, int yPos)
 {
 	auto& tile(manager.AddEntity());
-	tile.AddComponent<TileComponent>(x, y, 32, 32, tileID);
+	tile.AddComponent<TileComponent>(srcX, srcY, xPos, yPos, mapFile);
 	tile.AddGroup(groupMap);
 }

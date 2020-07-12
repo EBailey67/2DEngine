@@ -21,7 +21,9 @@ public:
 
 	TransformComponent(int scale)
 	{
-		position.Zero();
+		position.x = 400;
+		position.y = 320;
+		// position.Zero();
 		this->scale = scale;
 	}
 
