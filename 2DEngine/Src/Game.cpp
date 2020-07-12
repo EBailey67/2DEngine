@@ -2,7 +2,7 @@
 #include "TextureManager.h"
 #include "TileMap.h"
 #include "ECS\Components.h"
-
+#include "Collision.h"
 
 SDL_Renderer* Game::renderer = nullptr;
 
@@ -11,8 +11,19 @@ TileMap* map = nullptr;
 Manager manager;
 SDL_Event Game::event;
 
+std::vector<ColliderComponent*> Game::colliders;
 
 auto& player(manager.AddEntity());
+auto& wall(manager.AddEntity());
+
+enum groupLabels : std::size_t
+{
+	groupMap,
+	groupPlayers,
+	groupEnemies,
+	groupColliders
+};
+
 
 Game::Game()
 {
@@ -50,10 +61,20 @@ void Game::Init(const char* title, int xpos, int ypos, int width, int height, bo
 	}
 
 	// ECS Implementation
+	TileMap::LoadTileMap("assets/levels/sample_16x16.map", 16, 16);
 
-	player.AddComponent<TransformComponent>();
-	player.AddComponent<SpriteComponent>("Assets/Sprites/player.png");
+
+	player.AddComponent<TransformComponent>(2);
+	player.AddComponent<SpriteComponent>("Assets/Sprites/player_idle.png", 4, 100);
 	player.AddComponent<KeyboardController>();
+	player.AddComponent<ColliderComponent>("player");
+	player.AddGroup(groupPlayers);
+
+
+	wall.AddComponent<TransformComponent>(300.0f, 300.0f, 300, 20, 1);
+	wall.AddComponent<SpriteComponent>("Assets/Sprites/dirt.png");
+	wall.AddComponent<ColliderComponent>("wall");
+	wall.AddGroup(groupMap);
 
 	map = new TileMap();
 }
@@ -75,15 +96,38 @@ void Game::Update()
 {
 	manager.Refresh();
 	manager.Update();
+
+	for (auto cc : colliders)
+	{
+		Collision::AABB(player.GetComponent<ColliderComponent>(), *cc);
+	}
 }
+
+auto& tiles(manager.GetGroup(groupMap));
+auto& players(manager.GetGroup(groupPlayers));
+auto& enemies(manager.GetGroup(groupEnemies));
+
 
 void Game::Render()
 {
 	SDL_RenderClear(renderer);
 	
 	// add stuff to render here
-	map->DrawMap();
-	manager.Draw();
+	for (auto& t : tiles)
+	{
+		t->Draw();
+	}
+
+	for (auto& p : players)
+	{
+		p->Draw();
+	}
+
+	for (auto& e : enemies)
+	{
+		e->Draw();
+	}
+
 
 	SDL_RenderPresent(renderer);
 }
@@ -100,4 +144,11 @@ void Game::Clean()
 bool Game::IsRunning()
 {
 	return isRunning;
+}
+
+void Game::AddTile(int tileID, int x, int y)
+{
+	auto& tile(manager.AddEntity());
+	tile.AddComponent<TileComponent>(x, y, 32, 32, tileID);
+	tile.AddGroup(groupMap);
 }

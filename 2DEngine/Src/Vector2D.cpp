@@ -89,6 +89,19 @@ Vector2D& Vector2D::operator/=(const Vector2D& vector)
 	return this->Divide(vector);
 }
 
+Vector2D& Vector2D::operator*(const int& scale)
+{
+	this->x *= scale;
+	this->y *= scale;
+	return *this;
+}
+
+Vector2D& Vector2D::Zero()
+{
+	this->x = 0.0f;
+	this->y = 0.0f;
+	return *this;
+}
 
 std::ostream& operator<<(std::ostream& stream, const Vector2D& vector)
 {
