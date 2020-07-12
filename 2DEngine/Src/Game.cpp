@@ -65,7 +65,7 @@ void Game::Init(const char* title, int xpos, int ypos, int width, int height, bo
 
 
 	player.AddComponent<TransformComponent>(2);
-	player.AddComponent<SpriteComponent>("Assets/Sprites/player_idle.png", 4, 100);
+	player.AddComponent<SpriteComponent>("Assets/Sprites/player_anims.png", true);
 	player.AddComponent<KeyboardController>();
 	player.AddComponent<ColliderComponent>("player");
 	player.AddGroup(groupPlayers);
